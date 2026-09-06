@@ -1,0 +1,3816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>GeoShield AI — Global Hazard Intelligence</title>
+
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+
+:root{
+  --bg:#08090d;
+  --panel:#11131a;
+  --panel2:#171a22;
+  --panel3:#0d0f14;
+
+  --line:#282d38;
+
+  --text:#f4f6f8;
+  --muted:#89919e;
+
+  --red:#ff4057;
+  --red2:#ff6978;
+
+  --orange:#ff9d38;
+  --yellow:#f4d35e;
+
+  --green:#32d296;
+  --cyan:#46d9ff;
+  --purple:#a77cff;
+
+  --shadow:0 20px 70px rgba(0,0,0,.5);
+
+  --mono:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    Menlo,
+    monospace;
+
+  --sans:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+
+  background:
+    radial-gradient(
+      circle at 50% -20%,
+      #252019 0,
+      #0b0c10 35%,
+      #08090d 70%
+    );
+
+  color:var(--text);
+
+  font-family:var(--sans);
+}
+
+button,
+input,
+select{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+
+.app{
+  height:100vh;
+
+  display:grid;
+
+  grid-template-rows:
+    70px
+    1fr;
+}
+
+header{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  padding:
+    0 22px;
+
+  border-bottom:
+    1px solid var(--line);
+
+  background:
+    rgba(10,11,15,.92);
+
+  backdrop-filter:
+    blur(18px);
+
+  z-index:2000;
+}
+
+.brand{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:13px;
+}
+
+.logo{
+
+  width:39px;
+  height:39px;
+
+  border-radius:50%;
+
+  border:
+    1px solid
+    rgba(255,64,87,.6);
+
+  position:relative;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,64,87,.35),
+      transparent 58%
+    );
+
+  box-shadow:
+    0 0 30px
+    rgba(255,64,87,.14);
+}
+
+.logo:before{
+
+  content:"";
+
+  position:absolute;
+
+  inset:8px;
+
+  border:
+    1px solid
+    rgba(255,157,56,.9);
+
+  border-radius:50%;
+}
+
+.logo:after{
+
+  content:"";
+
+  position:absolute;
+
+  width:5px;
+  height:5px;
+
+  border-radius:50%;
+
+  background:
+    var(--red);
+
+  left:50%;
+  top:50%;
+
+  transform:
+    translate(-50%,-50%);
+
+  box-shadow:
+    0 0 12px var(--red);
+}
+
+.brand-name{
+
+  font-weight:800;
+
+  letter-spacing:
+    .08em;
+
+  font-size:17px;
+}
+
+.brand-sub{
+
+  color:var(--muted);
+
+  font-size:9px;
+
+  letter-spacing:
+    .15em;
+
+  text-transform:
+    uppercase;
+
+  margin-top:2px;
+}
+
+.header-right{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:20px;
+}
+
+.system{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:8px;
+
+  font-family:var(--mono);
+
+  font-size:10px;
+
+  color:var(--green);
+}
+
+.system-dot{
+
+  width:7px;
+  height:7px;
+
+  border-radius:50%;
+
+  background:var(--green);
+
+  box-shadow:
+    0 0 0 4px
+    rgba(50,210,150,.1),
+    0 0 15px
+    var(--green);
+}
+
+.utc{
+
+  color:var(--muted);
+
+  font-family:var(--mono);
+
+  font-size:10px;
+}
+
+.main{
+
+  min-height:0;
+
+  display:grid;
+
+  grid-template-columns:
+    325px
+    1fr
+    350px;
+}
+
+.panel{
+
+  min-height:0;
+
+  overflow:auto;
+
+  background:
+    rgba(17,19,26,.96);
+
+  border-right:
+    1px solid var(--line);
+
+  z-index:1000;
+}
+
+.panel.right{
+
+  border-right:0;
+
+  border-left:
+    1px solid var(--line);
+}
+
+.panel::-webkit-scrollbar{
+  width:4px;
+}
+
+.panel::-webkit-scrollbar-thumb{
+
+  background:
+    #363c48;
+
+  border-radius:10px;
+}
+
+.intro{
+
+  padding:22px 18px;
+
+  border-bottom:
+    1px solid var(--line);
+
+  background:
+
+    radial-gradient(
+      circle at 100% 0,
+      rgba(255,64,87,.10),
+      transparent 45%
+    );
+}
+
+.kicker{
+
+  color:var(--red);
+
+  font-family:var(--mono);
+
+  font-size:9px;
+
+  letter-spacing:
+    .15em;
+
+  text-transform:
+    uppercase;
+
+  margin-bottom:9px;
+}
+
+.intro h1{
+
+  margin:0;
+
+  font-size:23px;
+
+  line-height:1.08;
+
+  letter-spacing:-.03em;
+}
+
+.intro p{
+
+  margin:
+    11px 0 0;
+
+  color:var(--muted);
+
+  font-size:11px;
+
+  line-height:1.65;
+}
+
+.section{
+
+  padding:
+    16px 17px;
+
+  border-bottom:
+    1px solid var(--line);
+}
+
+.section-title{
+
+  color:#aab1bc;
+
+  font-size:9px;
+
+  font-weight:800;
+
+  letter-spacing:
+    .14em;
+
+  text-transform:
+    uppercase;
+
+  margin-bottom:11px;
+}
+
+.stats{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:7px;
+}
+
+.stat{
+
+  padding:11px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius:8px;
+
+  background:
+    var(--panel3);
+}
+
+.stat-label{
+
+  color:var(--muted);
+
+  font-size:8px;
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    .08em;
+}
+
+.stat-value{
+
+  margin-top:4px;
+
+  font-family:var(--mono);
+
+  font-size:21px;
+
+  font-weight:700;
+}
+
+.red{
+  color:var(--red);
+}
+
+.orange{
+  color:var(--orange);
+}
+
+.green{
+  color:var(--green);
+}
+
+.cyan{
+  color:var(--cyan);
+}
+
+.source{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  padding:9px 10px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius:7px;
+
+  margin-bottom:6px;
+
+  background:
+    var(--panel3);
+}
+
+.source-name{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:8px;
+
+  font-size:10px;
+}
+
+.source-dot{
+
+  width:7px;
+  height:7px;
+
+  border-radius:50%;
+
+  background:
+    var(--green);
+}
+
+.source-state{
+
+  color:var(--green);
+
+  font-family:var(--mono);
+
+  font-size:8px;
+}
+
+.mode-buttons{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap:5px;
+}
+
+.mode{
+
+  padding:9px 5px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius:6px;
+
+  background:
+    var(--panel3);
+
+  color:var(--muted);
+
+  font-size:9px;
+}
+
+.mode.active{
+
+  color:#fff;
+
+  border-color:
+    rgba(255,64,87,.55);
+
+  background:
+    rgba(255,64,87,.10);
+}
+
+.map{
+
+  position:relative;
+
+  min-width:0;
+  min-height:0;
+
+  background:#101318;
+}
+
+#map{
+
+  width:100%;
+  height:100%;
+}
+
+.leaflet-tile{
+
+  filter:
+    brightness(.72)
+    contrast(1.04)
+    saturate(.72);
+}
+
+.leaflet-control-zoom{
+
+  border:
+    1px solid var(--line)
+    !important;
+
+  box-shadow:none !important;
+}
+
+.leaflet-control-zoom a{
+
+  background:
+    #151820
+    !important;
+
+  color:#fff
+    !important;
+
+  border-bottom:
+    1px solid var(--line)
+    !important;
+}
+
+.leaflet-control-attribution{
+
+  background:
+    rgba(7,8,11,.75)
+    !important;
+
+  color:#6e7683
+    !important;
+}
+
+.map-top{
+
+  position:absolute;
+
+  left:15px;
+  right:15px;
+  top:15px;
+
+  z-index:500;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  pointer-events:none;
+}
+
+.map-title{
+
+  padding:
+    10px 12px;
+
+  border:
+    1px solid
+    rgba(255,255,255,.08);
+
+  border-radius:8px;
+
+  background:
+    rgba(10,11,15,.88);
+
+  backdrop-filter:
+    blur(12px);
+
+  box-shadow:
+    var(--shadow);
+}
+
+.map-title-main{
+
+  font-size:10px;
+
+  font-weight:800;
+
+  letter-spacing:
+    .12em;
+}
+
+.map-title-sub{
+
+  color:var(--muted);
+
+  font-size:8px;
+
+  font-family:var(--mono);
+
+  margin-top:4px;
+}
+
+.map-controls{
+
+  display:flex;
+
+  gap:6px;
+
+  pointer-events:auto;
+}
+
+.map-button{
+
+  border:
+    1px solid
+    rgba(255,255,255,.1);
+
+  background:
+    rgba(10,11,15,.88);
+
+  color:#dfe3e8;
+
+  border-radius:7px;
+
+  padding:
+    9px 11px;
+
+  font-size:9px;
+}
+
+.legend{
+
+  position:absolute;
+
+  left:15px;
+  bottom:18px;
+
+  z-index:500;
+
+  background:
+    rgba(10,11,15,.91);
+
+  border:
+    1px solid
+    rgba(255,255,255,.08);
+
+  border-radius:8px;
+
+  padding:11px;
+
+  backdrop-filter:
+    blur(12px);
+}
+
+.legend-row{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:7px;
+
+  color:#b0b6c0;
+
+  font-size:8px;
+
+  margin-bottom:6px;
+}
+
+.legend-row:last-child{
+  margin-bottom:0;
+}
+
+.legend-dot{
+
+  width:8px;
+  height:8px;
+
+  border-radius:50%;
+}
+
+.country-card{
+
+  padding:17px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,64,87,.11),
+      rgba(255,157,56,.03)
+    );
+
+  border-bottom:
+    1px solid var(--line);
+}
+
+.country-kicker{
+
+  color:var(--muted);
+
+  font-family:var(--mono);
+
+  font-size:8px;
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    .12em;
+}
+
+.country-name{
+
+  font-size:25px;
+
+  font-weight:800;
+
+  margin-top:5px;
+}
+
+.country-status{
+
+  margin-top:6px;
+
+  display:inline-block;
+
+  padding:
+    4px 7px;
+
+  border-radius:4px;
+
+  font-family:var(--mono);
+
+  font-size:8px;
+
+  color:
+    var(--red);
+
+  background:
+    rgba(255,64,87,.10);
+}
+
+.score-wrap{
+
+  display:grid;
+
+  grid-template-columns:
+    115px 1fr;
+
+  gap:16px;
+
+  align-items:center;
+}
+
+.score{
+
+  width:108px;
+  height:108px;
+
+  border-radius:50%;
+
+  display:grid;
+
+  place-items:center;
+
+  background:
+    conic-gradient(
+      var(--red)
+      var(--score,0%),
+      #252933
+      0
+    );
+
+  position:relative;
+}
+
+.score:before{
+
+  content:"";
+
+  position:absolute;
+
+  inset:8px;
+
+  border-radius:50%;
+
+  background:
+    #11131a;
+}
+
+.score-inner{
+
+  position:relative;
+
+  text-align:center;
+}
+
+.score-number{
+
+  font-family:var(--mono);
+
+  font-size:25px;
+
+  font-weight:800;
+}
+
+.score-label{
+
+  color:var(--muted);
+
+  font-size:7px;
+
+  text-transform:uppercase;
+}
+
+.score-info{
+
+  display:grid;
+
+  gap:7px;
+}
+
+.score-line{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  font-size:9px;
+}
+
+.score-line span:first-child{
+
+  color:var(--muted);
+}
+
+.component{
+
+  margin-bottom:10px;
+}
+
+.component-head{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  font-size:9px;
+
+  margin-bottom:5px;
+}
+
+.component-head span:first-child{
+
+  color:#adb4bf;
+}
+
+.component-head span:last-child{
+
+  font-family:var(--mono);
+}
+
+.bar{
+
+  height:5px;
+
+  border-radius:5px;
+
+  overflow:hidden;
+
+  background:
+    #242833;
+}
+
+.fill{
+
+  height:100%;
+
+  width:0;
+
+  border-radius:5px;
+
+  transition:
+    width .5s ease;
+}
+
+.relocation{
+
+  border:
+    1px solid
+    rgba(255,64,87,.28);
+
+  border-radius:8px;
+
+  padding:12px;
+
+  background:
+    rgba(255,64,87,.055);
+}
+
+.relocation-head{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+}
+
+.relocation-title{
+
+  color:var(--red);
+
+  font-size:10px;
+
+  font-weight:800;
+}
+
+.relocation-level{
+
+  font-family:var(--mono);
+
+  font-size:8px;
+
+  color:var(--red);
+}
+
+.relocation-text{
+
+  margin-top:8px;
+
+  color:#aeb5c0;
+
+  font-size:9px;
+
+  line-height:1.6;
+}
+
+.events{
+
+  display:grid;
+
+  gap:6px;
+}
+
+.event{
+
+  padding:9px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius:7px;
+
+  background:
+    var(--panel3);
+
+  cursor:pointer;
+
+  transition:
+    .15s ease;
+}
+
+.event:hover{
+
+  transform:
+    translateY(-1px);
+
+  border-color:
+    #4b5260;
+}
+
+.event-top{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  gap:7px;
+}
+
+.event-title{
+
+  font-size:9px;
+
+  font-weight:650;
+
+  line-height:1.35;
+}
+
+.event-meta{
+
+  color:var(--muted);
+
+  font-family:var(--mono);
+
+  font-size:7px;
+
+  margin-top:4px;
+}
+
+.badge{
+
+  white-space:nowrap;
+
+  font-family:var(--mono);
+
+  font-size:7px;
+
+  padding:
+    3px 5px;
+
+  border-radius:3px;
+}
+
+.badge.red{
+
+  color:var(--red);
+
+  background:
+    rgba(255,64,87,.11);
+}
+
+.badge.orange{
+
+  color:var(--orange);
+
+  background:
+    rgba(255,157,56,.11);
+}
+
+.badge.green{
+
+  color:var(--green);
+
+  background:
+    rgba(50,210,150,.11);
+}
+
+.search{
+
+  width:100%;
+
+  padding:
+    10px 11px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius:7px;
+
+  background:
+    var(--panel3);
+
+  color:#fff;
+
+  outline:none;
+
+  font-size:10px;
+}
+
+.search:focus{
+
+  border-color:
+    rgba(255,64,87,.6);
+}
+
+@media(max-width:1150px){
+
+  .main{
+
+    grid-template-columns:
+      275px 1fr;
+  }
+
+  .panel.right{
+    display:none;
+  }
+
+}
+
+@media(max-width:750px){
+
+  .main{
+
+    grid-template-columns:
+      1fr;
+  }
+
+  .panel.left{
+    display:none;
+  }
+
+  .header-right{
+    display:none;
+  }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="app">
+
+<header>
+
+  <div class="brand">
+
+    <div class="logo"></div>
+
+    <div>
+
+      <div class="brand-name">
+        GEOSHIELD AI
+      </div>
+
+      <div class="brand-sub">
+        Global Hazard Intelligence & Relocation System
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="header-right">
+
+    <div class="system">
+
+      <span class="system-dot"></span>
+
+      MULTI-SOURCE LIVE
+
+    </div>
+
+    <div
+      class="utc"
+      id="clock"
+    >
+      --:--:-- UTC
+    </div>
+
+  </div>
+
+</header>
+
+<div class="main">
+
+<aside class="panel left">
+
+
+  <div class="intro">
+
+    <div class="kicker">
+      Disaster Intelligence Platform
+    </div>
+
+    <h1>
+      Hazard-Based Red Zones
+    </h1>
+
+    <p>
+      Intelligent identification of hazard exposure,
+      vulnerability, carrying-capacity stress and
+      immediate relocation needs for vulnerable
+      habitations.
+    </p>
+
+  </div>
+
+  <section class="section">
+
+    <div class="section-title">
+      Global Situation
+    </div>
+
+    <div class="stats">
+
+      <div class="stat">
+
+        <div class="stat-label">
+          Live Events
+        </div>
+
+        <div
+          class="stat-value red"
+          id="liveEvents"
+        >
+          0
+        </div>
+
+      </div>
+
+
+      <div class="stat">
+
+        <div class="stat-label">
+          Flood / Water
+        </div>
+
+        <div
+          class="stat-value cyan"
+          id="floodEvents"
+        >
+          0
+        </div>
+
+      </div>
+
+
+      <div class="stat">
+
+        <div class="stat-label">
+          High Priority
+        </div>
+
+        <div
+          class="stat-value orange"
+          id="highEvents"
+        >
+          0
+        </div>
+
+      </div>
+
+
+      <div class="stat">
+
+        <div class="stat-label">
+          Sources
+        </div>
+
+        <div
+          class="stat-value green"
+        >
+          03
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="section">
+
+    <div class="section-title">
+      Live Data Sources
+    </div>
+
+
+    <div class="source">
+
+      <div class="source-name">
+
+        <span class="source-dot"></span>
+
+        USGS Earthquakes
+
+      </div>
+
+      <div
+        class="source-state"
+        id="usgsState"
+      >
+        READY
+      </div>
+
+    </div>
+
+
+    <div class="source">
+
+      <div class="source-name">
+
+        <span class="source-dot"></span>
+
+        NASA EONET
+
+      </div>
+
+      <div
+        class="source-state"
+        id="nasaState"
+      >
+        READY
+      </div>
+
+    </div>
+
+
+    <div class="source">
+
+      <div class="source-name">
+
+        <span class="source-dot"></span>
+
+        GDACS
+
+      </div>
+
+      <div
+        class="source-state"
+        id="gdacsState"
+      >
+        READY
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="section">
+
+    <div class="section-title">
+      Intelligence Mode
+    </div>
+
+    <div class="mode-buttons">
+
+      <button
+        class="mode active"
+        id="modeCombined"
+        onclick="setMode('combined')"
+      >
+        COMBINED
+      </button>
+
+      <button
+        class="mode"
+        id="modeLive"
+        onclick="setMode('live')"
+      >
+        LIVE
+      </button>
+
+      <button
+        class="mode"
+        id="modeBaseline"
+        onclick="setMode('baseline')"
+      >
+        BASELINE
+      </button>
+
+    </div>
+
+  </section>
+
+  <section class="section">
+
+    <div class="section-title">
+      Country Intelligence
+    </div>
+
+    <input
+      class="search"
+      id="countrySearch"
+      placeholder="Search country e.g. Nepal"
+      autocomplete="off"
+    />
+
+  </section>
+
+  <section class="section">
+
+    <div class="section-title">
+      Red-Zone Model
+    </div>
+
+    <div class="component">
+
+      <div class="component-head">
+
+        <span>
+          Hazard Exposure
+        </span>
+
+        <span id="hazardComponent">
+          0
+        </span>
+
+      </div>
+
+      <div class="bar">
+
+        <div
+          class="fill"
+          id="hazardBar"
+          style="background:var(--red)"
+        ></div>
+
+      </div>
+
+    </div>
+
+
+    <div class="component">
+
+      <div class="component-head">
+
+        <span>
+          Vulnerability
+        </span>
+
+        <span id="vulnerabilityComponent">
+          0
+        </span>
+
+      </div>
+
+      <div class="bar">
+
+        <div
+          class="fill"
+          id="vulnerabilityBar"
+          style="background:var(--orange)"
+        ></div>
+
+      </div>
+
+    </div>
+
+
+    <div class="component">
+
+      <div class="component-head">
+
+        <span>
+          Coping Capacity Stress
+        </span>
+
+        <span id="capacityComponent">
+          0
+        </span>
+
+      </div>
+
+      <div class="bar">
+
+        <div
+          class="fill"
+          id="capacityBar"
+          style="background:var(--purple)"
+        ></div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="section">
+
+    <div class="section-title">
+      Model Principle
+    </div>
+
+    <p
+      style="
+        color:var(--muted);
+        font-size:9px;
+        line-height:1.65;
+        margin:0;
+      "
+    >
+
+      A live disaster feed alone cannot describe total
+      risk. GeoShield therefore combines observed events
+      with baseline hazard exposure, vulnerability and
+      coping-capacity indicators.
+
+      <br><br>
+
+      This is a planning-support model and does not
+      replace official evacuation orders, hydrological
+      forecasts, engineering assessments or field
+      verification.
+
+    </p>
+
+  </section>
+
+
+</aside>
+
+<main class="map">
+
+  <div id="map"></div>
+
+
+  <div class="map-top">
+
+    <div class="map-title">
+
+      <div class="map-title-main">
+        GLOBAL HAZARD MAP
+      </div>
+
+      <div class="map-title-sub">
+        ENGLISH BASEMAP · LIVE + BASELINE RISK
+      </div>
+
+    </div>
+
+
+    <div class="map-controls">
+
+      <button
+        class="map-button"
+        onclick="worldView()"
+      >
+        WORLD
+      </button>
+
+      <button
+        class="map-button"
+        onclick="refreshAll()"
+      >
+        ↻ REFRESH
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="legend">
+
+    <div class="legend-row">
+
+      <span
+        class="legend-dot"
+        style="background:#ff4057"
+      ></span>
+
+      High / Red Zone
+
+    </div>
+
+
+    <div class="legend-row">
+
+      <span
+        class="legend-dot"
+        style="background:#ff9d38"
+      ></span>
+
+      Elevated
+
+    </div>
+
+
+    <div class="legend-row">
+
+      <span
+        class="legend-dot"
+        style="background:#32d296"
+      ></span>
+
+      Lower observed risk
+
+    </div>
+
+
+    <div class="legend-row">
+
+      <span
+        class="legend-dot"
+        style="background:#46d9ff"
+      ></span>
+
+      Flood / Water
+
+    </div>
+
+  </div>
+
+</main>
+
+<aside class="panel right">
+
+
+  <div class="country-card">
+
+    <div class="country-kicker">
+      Selected Area
+    </div>
+
+    <div
+      class="country-name"
+      id="countryName"
+    >
+      Nepal
+    </div>
+
+    <div
+      class="country-status"
+      id="countryStatus"
+    >
+      HIGH BASELINE RISK
+    </div>
+
+  </div>
+
+  <section class="section">
+
+    <div class="section-title">
+      Red-Zone Priority
+    </div>
+
+    <div class="score-wrap">
+
+      <div
+        class="score"
+        id="scoreCircle"
+      >
+
+        <div class="score-inner">
+
+          <div
+            class="score-number"
+            id="score"
+          >
+            82
+          </div>
+
+          <div class="score-label">
+            / 100
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="score-info">
+
+        <div class="score-line">
+
+          <span>
+            Hazard
+          </span>
+
+          <strong id="scoreHazard">
+            88
+          </strong>
+
+        </div>
+
+
+        <div class="score-line">
+
+          <span>
+            Vulnerability
+          </span>
+
+          <strong id="scoreVulnerability">
+            79
+          </strong>
+
+        </div>
+
+
+        <div class="score-line">
+
+          <span>
+            Capacity Stress
+          </span>
+
+          <strong id="scoreCapacity">
+            73
+          </strong>
+
+        </div>
+
+
+        <div class="score-line">
+
+          <span>
+            Live Signal
+          </span>
+
+          <strong
+            id="scoreLive"
+            class="red"
+          >
+            HIGH
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="section">
+
+    <div class="section-title">
+      Carrying Capacity
+    </div>
+
+
+    <div class="component">
+
+      <div class="component-head">
+
+        <span>
+          Shelter availability
+        </span>
+
+        <span>
+          31%
+        </span>
+
+      </div>
+
+      <div class="bar">
+
+        <div
+          class="fill"
+          style="
+            width:31%;
+            background:var(--red)
+          "
+        ></div>
+
+      </div>
+
+    </div>
+
+
+    <div class="component">
+
+      <div class="component-head">
+
+        <span>
+          Transport accessibility
+        </span>
+
+        <span>
+          43%
+        </span>
+
+      </div>
+
+      <div class="bar">
+
+        <div
+          class="fill"
+          style="
+            width:43%;
+            background:var(--orange)
+          "
+        ></div>
+
+      </div>
+
+    </div>
+
+
+    <div class="component">
+
+      <div class="component-head">
+
+        <span>
+          Health-service capacity
+        </span>
+
+        <span>
+          39%
+        </span>
+
+      </div>
+
+      <div class="bar">
+
+        <div
+          class="fill"
+          style="
+            width:39%;
+            background:var(--purple)
+          "
+        ></div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="section">
+
+    <div class="relocation">
+
+      <div class="relocation-head">
+
+        <div class="relocation-title">
+          ⚠ RELOCATION PRIORITY
+        </div>
+
+        <div
+          class="relocation-level"
+          id="relocationLevel"
+        >
+          HIGH
+        </div>
+
+      </div>
+
+
+      <div
+        class="relocation-text"
+        id="relocationText"
+      >
+
+        Immediate relocation-readiness assessment
+        recommended for exposed vulnerable settlements,
+        especially flood plains, steep terrain and
+        river corridors.
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="section">
+
+    <div class="section-title">
+      Highest Priority Events
+    </div>
+
+    <div
+      class="events"
+      id="events"
+    >
+
+      <div
+        style="
+          color:var(--muted);
+          font-size:9px;
+        "
+      >
+        Loading live intelligence...
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="section">
+
+    <div class="section-title">
+      Interpretation
+    </div>
+
+    <p
+      style="
+        margin:0;
+        color:var(--muted);
+        font-size:9px;
+        line-height:1.6;
+      "
+    >
+
+      Red-zone status represents a decision-support
+      priority score. It is not an official evacuation
+      order.
+
+      <br><br>
+
+      Live events are separated from baseline
+      susceptibility so countries such as Nepal are not
+      incorrectly treated as "safe" simply because a
+      specific flood event is not currently visible.
+
+    </p>
+
+  </section>
+
+
+</aside>
+
+</div>
+</div>
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+<script>
+
+const CONFIG = {
+
+  refreshMs:
+    5 * 60 * 1000,
+
+  usgs:
+    "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson",
+
+  eonet:
+    "https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=500",
+
+  /*
+    GDACS API.
+
+    Multiple disaster classes are requested so floods,
+    cyclones, earthquakes, volcanoes, droughts and fires
+    aren't silently ignored.
+  */
+
+  gdacs:
+    "https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH"
+    +
+    "?eventlist=EQ;FL;TC;VO;WF;DR"
+    +
+    "&fromdate="
+    +
+    new Date(
+      Date.now() - 30 * 86400000
+    ).toISOString().slice(0,10)
+    +
+    "&todate="
+    +
+    new Date().toISOString().slice(0,10),
+
+  colors:{
+    earthquake:"#ff4057",
+    flood:"#46d9ff",
+    wildfire:"#ff9d38",
+    volcano:"#a77cff",
+    cyclone:"#ffcc66",
+    drought:"#d9b65c",
+    other:"#32d296"
+  }
+
+};
+
+const WORLD_BOUNDS=[
+  [-60,-180],
+  [85,180]
+];
+
+const map=L.map(
+  "map",
+  {
+    worldCopyJump:true,
+    minZoom:2,
+    maxZoom:12,
+    zoomControl:true
+  }
+);
+
+map.fitBounds(
+  WORLD_BOUNDS
+);
+
+L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+  {
+    maxZoom:19,
+
+    attribution:
+      "Tiles &copy; Esri"
+  }
+).addTo(map);
+
+const liveLayer=
+  L.layerGroup().addTo(map);
+
+const baselineLayer=
+  L.layerGroup().addTo(map);
+
+const gdacsLayer=
+  L.layerGroup().addTo(map);
+
+let hazards=[];
+
+let gdacsEvents=[];
+
+let selectedCountry="Nepal";
+
+let currentMode="combined";
+
+const COUNTRY_PROFILES={
+
+  Nepal:{
+    lat:28.3949,
+    lon:84.1240,
+
+    hazard:88,
+    vulnerability:79,
+    capacityStress:73,
+
+    flood:92,
+    landslide:94,
+    earthquake:91,
+
+    shelter:31,
+    transport:43,
+    health:39,
+
+    reason:
+      "High exposure to monsoon flooding, flash floods, landslides and major seismic hazard."
+  },
+
+  Bangladesh:{
+    lat:23.6850,
+    lon:90.3563,
+
+    hazard:90,
+    vulnerability:82,
+    capacityStress:70,
+
+    flood:96,
+    landslide:54,
+    earthquake:55,
+
+    shelter:39,
+    transport:48,
+    health:44,
+
+    reason:
+      "Very high flood, cyclone and population exposure."
+  },
+
+  India:{
+    lat:22.9734,
+    lon:78.6569,
+
+    hazard:82,
+    vulnerability:61,
+    capacityStress:55,
+
+    flood:81,
+    landslide:68,
+    earthquake:63,
+
+    shelter:58,
+    transport:64,
+    health:60,
+
+    reason:
+      "Multiple hazard zones including floods, cyclones, drought, heat and earthquakes."
+  },
+
+  Pakistan:{
+    lat:30.3753,
+    lon:69.3451,
+
+    hazard:79,
+    vulnerability:72,
+    capacityStress:66,
+
+    flood:87,
+    landslide:62,
+    earthquake:61,
+
+    shelter:40,
+    transport:47,
+    health:42,
+
+    reason:
+      "Flood, heat, drought and seismic exposure."
+  },
+
+  Philippines:{
+    lat:12.8797,
+    lon:121.7740,
+
+    hazard:91,
+    vulnerability:71,
+    capacityStress:61,
+
+    flood:84,
+    landslide:80,
+    earthquake:83,
+
+    shelter:52,
+    transport:55,
+    health:50,
+
+    reason:
+      "High tropical cyclone, flood, landslide and seismic exposure."
+  },
+
+  Indonesia:{
+    lat:-0.7893,
+    lon:113.9213,
+
+    hazard:88,
+    vulnerability:64,
+    capacityStress:55,
+
+    flood:77,
+    landslide:81,
+    earthquake:92,
+
+    shelter:55,
+    transport:61,
+    health:54,
+
+    reason:
+      "Very high earthquake, volcanic, flood and landslide exposure."
+  },
+
+  Japan:{
+    lat:36.2048,
+    lon:138.2529,
+
+    hazard:84,
+    vulnerability:28,
+    capacityStress:24,
+
+    flood:69,
+    landslide:73,
+    earthquake:96,
+
+    shelter:89,
+    transport:91,
+    health:92,
+
+    reason:
+      "Very high physical hazard exposure but strong coping capacity."
+  },
+
+  United_States:{
+    lat:37.0902,
+    lon:-95.7129,
+
+    hazard:73,
+    vulnerability:27,
+    capacityStress:23,
+
+    flood:55,
+    landslide:42,
+    earthquake:63,
+
+    shelter:91,
+    transport:90,
+    health:93,
+
+    reason:
+      "Broad multi-hazard exposure with comparatively strong capacity."
+  }
+
+};
+
+const baselinePoints=[
+
+  ["Nepal",28.3949,84.1240,88],
+  ["Bangladesh",23.6850,90.3563,90],
+  ["India",22.9734,78.6569,82],
+  ["Pakistan",30.3753,69.3451,79],
+  ["Philippines",12.8797,121.7740,91],
+  ["Indonesia",-0.7893,113.9213,88],
+  ["Japan",36.2048,138.2529,84],
+  ["United States",37.0902,-95.7129,73],
+
+  ["Myanmar",21.9162,95.9560,82],
+  ["Bhutan",27.5142,90.4336,82],
+  ["Sri Lanka",7.8731,80.7718,72],
+  ["Vietnam",14.0583,108.2772,81],
+  ["Thailand",15.8700,100.9925,72],
+  ["China",35.8617,104.1954,75],
+  ["Turkey",38.9637,35.2433,77],
+  ["Iran",32.4279,53.6880,76],
+  ["Afghanistan",33.9391,67.7100,84],
+  ["Mexico",23.6345,-102.5528,77],
+  ["Chile",-35.6751,-71.5430,83],
+  ["Ecuador",-1.8312,-78.1834,82],
+  ["Peru",-9.1900,-75.0152,80],
+  ["Colombia",4.5709,-74.2973,80],
+  ["Brazil",-14.2350,-51.9253,68],
+  ["Nigeria",9.0820,8.6753,68],
+  ["Ethiopia",9.1450,40.4897,78],
+  ["Kenya",-0.0236,37.9062,72],
+  ["Mozambique",-18.6657,35.5296,84],
+  ["Madagascar",-18.7669,46.8691,81],
+  ["South Africa",-30.5595,22.9375,58],
+  ["Australia",-25.2744,133.7751,66],
+  ["New Zealand",-40.9006,174.8860,72],
+  ["Vanuatu",-15.3767,166.9592,86],
+  ["Fiji",-17.7134,178.0650,79],
+  ["Haiti",18.9712,-72.2852,91],
+  ["Dominican Republic",18.7357,-70.1627,72],
+  ["Guatemala",15.7835,-90.2308,80],
+  ["Honduras",15.2000,-86.2419,83],
+  ["Nicaragua",12.8654,-85.2072,80],
+  ["Costa Rica",9.7489,-83.7534,74]
+
+];
+
+function renderBaseline(){
+
+  baselineLayer.clearLayers();
+
+  baselinePoints.forEach(
+    p=>{
+
+      const [
+        name,
+        lat,
+        lon,
+        score
+      ]=p;
+
+      const color=
+        score>=80
+          ? CONFIG.colors.earthquake
+          : score>=65
+            ? CONFIG.colors.wildfire
+            : CONFIG.colors.other;
+
+      const marker=
+        L.circleMarker(
+          [lat,lon],
+          {
+            radius:
+              Math.max(
+                5,
+                Math.min(
+                  14,
+                  score/8
+                )
+              ),
+
+            color,
+
+            fillColor:color,
+
+            fillOpacity:.22,
+
+            weight:1.2
+          }
+        );
+
+      marker.bindTooltip(
+        `<strong>${escapeHtml(name)}</strong><br>
+         Baseline risk: ${score}/100`
+      );
+
+      marker.on(
+        "click",
+        ()=>{
+          selectCountry(name);
+        }
+      );
+
+      marker.addTo(
+        baselineLayer
+      );
+
+    }
+  );
+
+}
+
+async function loadUSGS(){
+
+  setSource(
+    "usgsState",
+    "LOADING"
+  );
+
+  try{
+
+    const response=
+      await fetch(
+        CONFIG.usgs
+      );
+
+    if(!response.ok)
+      throw new Error(
+        "USGS failed"
+      );
+
+    const data=
+      await response.json();
+
+    const features=
+      data.features || [];
+
+    features.forEach(
+      feature=>{
+
+        const c=
+          feature.geometry.coordinates;
+
+        const p=
+          feature.properties || {};
+
+        const lon=c[0];
+        const lat=c[1];
+
+        const magnitude=
+          Number(
+            p.mag || 0
+          );
+
+        const risk=
+          Math.round(
+            Math.min(
+              100,
+              30 + magnitude*11
+            )
+          );
+
+        const hazard={
+          id:
+            "usgs-"+feature.id,
+
+          title:
+            p.place ||
+            "Earthquake",
+
+          type:
+            "Earthquake",
+
+          lat,
+          lon,
+
+          magnitude,
+
+          risk,
+
+          source:
+            "USGS",
+
+          time:
+            p.time || Date.now()
+        };
+
+        hazards.push(
+          hazard
+        );
+
+        addHazardMarker(
+          hazard,
+          CONFIG.colors.earthquake
+        );
+
+      }
+    );
+
+    setSource(
+      "usgsState",
+      "LIVE"
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+    setSource(
+      "usgsState",
+      "ERROR"
+    );
+
+  }
+
+}
+
+async function loadNASA(){
+
+  setSource(
+    "nasaState",
+    "LOADING"
+  );
+
+  try{
+
+    const response=
+      await fetch(
+        CONFIG.eonet
+      );
+
+    if(!response.ok)
+      throw new Error(
+        "NASA failed"
+      );
+
+    const data=
+      await response.json();
+
+    const events=
+      data.events || [];
+
+    events.forEach(
+      event=>{
+
+        if(
+          !event.geometry ||
+          !event.geometry.length
+        ){
+          return;
+        }
+
+        const geometry=
+          event.geometry[
+            event.geometry.length-1
+          ];
+
+        if(
+          geometry.type!=="Point"
+        ){
+          return;
+        }
+
+        const lon=
+          geometry.coordinates[0];
+
+        const lat=
+          geometry.coordinates[1];
+
+        const type=
+          event.categories
+            ?.map(
+              c=>c.title
+            )
+            .join(", ")
+          ||
+          "Natural Event";
+
+        const risk=
+          riskForType(
+            type
+          );
+
+        const hazard={
+          id:
+            "eonet-"+event.id,
+
+          title:
+            event.title ||
+            "Natural Event",
+
+          type,
+
+          lat,
+          lon,
+
+          risk,
+
+          source:
+            "NASA EONET",
+
+          time:
+            geometry.date
+              ? new Date(
+                  geometry.date
+                ).getTime()
+              : Date.now()
+        };
+
+        hazards.push(
+          hazard
+        );
+
+        addHazardMarker(
+          hazard,
+          colorForType(
+            type
+          )
+        );
+
+      }
+    );
+
+    setSource(
+      "nasaState",
+      "LIVE"
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+    setSource(
+      "nasaState",
+      "ERROR"
+    );
+
+  }
+
+}
+
+async function loadGDACS(){
+
+  setSource(
+    "gdacsState",
+    "LOADING"
+  );
+
+  try{
+
+    const response=
+      await fetch(
+        CONFIG.gdacs
+      );
+
+    if(!response.ok)
+      throw new Error(
+        "GDACS failed"
+      );
+
+    const data=
+      await response.json();
+
+    const events=
+      data?.features
+      ||
+      data?.data
+      ||
+      data
+      ||
+      [];
+
+    if(
+      !Array.isArray(events)
+    ){
+      throw new Error(
+        "Unexpected GDACS format"
+      );
+    }
+
+    gdacsEvents=
+      events;
+
+    events.forEach(
+      event=>{
+
+        const props=
+          event.properties ||
+          event;
+
+        let coordinates=
+          event.geometry?.coordinates;
+
+        if(
+          !coordinates &&
+          props.latitude &&
+          props.longitude
+        ){
+
+          coordinates=[
+            Number(
+              props.longitude
+            ),
+
+            Number(
+              props.latitude
+            )
+          ];
+
+        }
+
+        if(
+          !coordinates ||
+          coordinates.length<2
+        ){
+          return;
+        }
+
+        const lon=
+          Number(
+            coordinates[0]
+          );
+
+        const lat=
+          Number(
+            coordinates[1]
+          );
+
+        const type=
+          normalizeGDACSType(
+            props
+          );
+
+        const alert=
+          String(
+            props.alertlevel ||
+            props.alertLevel ||
+            ""
+          ).toLowerCase();
+
+        const risk=
+          alert.includes("red")
+            ? 92
+            : alert.includes("orange")
+              ? 78
+              : alert.includes("green")
+                ? 48
+                : riskForType(type);
+
+        const hazard={
+          id:
+            "gdacs-"+
+            (
+              props.eventid ||
+              props.eventId ||
+              Math.random()
+            ),
+
+          title:
+            props.eventname ||
+            props.eventName ||
+            props.description ||
+            "GDACS Event",
+
+          type,
+
+          lat,
+          lon,
+
+          risk,
+
+          source:
+            "GDACS",
+
+          alert,
+
+          time:
+            Date.now()
+        };
+
+        hazards.push(
+          hazard
+        );
+
+        addHazardMarker(
+          hazard,
+          colorForType(type)
+        );
+
+      }
+    );
+
+    setSource(
+      "gdacsState",
+      "LIVE"
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      "GDACS",
+      error
+    );
+
+    setSource(
+      "gdacsState",
+      "ERROR"
+    );
+
+  }
+
+}
+
+function normalizeGDACSType(
+  props
+){
+
+  const text=
+    (
+      props.eventtype ||
+      props.eventType ||
+      props.type ||
+      props.description ||
+      ""
+    )
+    .toString()
+    .toUpperCase();
+
+  if(
+    text.includes("FL")
+    ||
+    text.includes("FLOOD")
+  )
+    return "Flood";
+
+  if(
+    text.includes("TC")
+    ||
+    text.includes("CYCL")
+  )
+    return "Cyclone";
+
+  if(
+    text.includes("VO")
+    ||
+    text.includes("VOLC")
+  )
+    return "Volcano";
+
+  if(
+    text.includes("WF")
+    ||
+    text.includes("FIRE")
+  )
+    return "Wildfire";
+
+  if(
+    text.includes("DR")
+    ||
+    text.includes("DROUGHT")
+  )
+    return "Drought";
+
+  if(
+    text.includes("EQ")
+    ||
+    text.includes("EARTH")
+  )
+    return "Earthquake";
+
+  return "Natural Hazard";
+}
+
+function addHazardMarker(
+  hazard,
+  color
+){
+
+  const radius=
+    hazard.risk>=80
+      ? 9
+      : hazard.risk>=60
+        ? 7
+        : 5;
+
+  const marker=
+    L.circleMarker(
+      [
+        hazard.lat,
+        hazard.lon
+      ],
+      {
+        radius,
+
+        color,
+
+        fillColor:color,
+
+        fillOpacity:.78,
+
+        weight:1.4
+      }
+    );
+
+  marker.bindTooltip(
+    `<strong>${escapeHtml(
+      hazard.title
+    )}</strong><br>
+     ${escapeHtml(
+       hazard.type
+     )}<br>
+     Priority: ${
+       hazard.risk
+     }/100`
+  );
+
+  marker.on(
+    "click",
+    ()=>{
+      selectHazard(
+        hazard
+      );
+    }
+  );
+
+  marker.addTo(
+    liveLayer
+  );
+
+}
+
+function riskForType(
+  type
+){
+
+  const t=
+    String(type)
+      .toLowerCase();
+
+  if(
+    t.includes("flood")
+  )
+    return 86;
+
+  if(
+    t.includes("wildfire") ||
+    t.includes("fire")
+  )
+    return 75;
+
+  if(
+    t.includes("volcano")
+  )
+    return 82;
+
+  if(
+    t.includes("cyclone") ||
+    t.includes("storm") ||
+    t.includes("hurricane")
+  )
+    return 84;
+
+  if(
+    t.includes("landslide")
+  )
+    return 83;
+
+  if(
+    t.includes("drought")
+  )
+    return 65;
+
+  if(
+    t.includes("earthquake")
+  )
+    return 80;
+
+  return 60;
+
+}
+
+function colorForType(
+  type
+){
+
+  const t=
+    String(type)
+      .toLowerCase();
+
+  if(t.includes("flood"))
+    return CONFIG.colors.flood;
+
+  if(
+    t.includes("fire") ||
+    t.includes("wildfire")
+  )
+    return CONFIG.colors.wildfire;
+
+  if(t.includes("volcano"))
+    return CONFIG.colors.volcano;
+
+  if(
+    t.includes("cyclone") ||
+    t.includes("storm")
+  )
+    return CONFIG.colors.cyclone;
+
+  if(t.includes("drought"))
+    return CONFIG.colors.drought;
+
+  if(t.includes("earthquake"))
+    return CONFIG.colors.earthquake;
+
+  return CONFIG.colors.other;
+
+}
+
+function selectCountry(
+  name
+){
+
+  const key=
+    normalizeCountryKey(
+      name
+    );
+
+  selectedCountry=
+    name;
+
+  const profile=
+    COUNTRY_PROFILES[key]
+    ||
+    generateGenericProfile(
+      key
+    );
+
+  renderCountry(
+    name,
+    profile
+  );
+
+  map.flyTo(
+    [
+      profile.lat,
+      profile.lon
+    ],
+    5,
+    {
+      duration:.8
+    }
+  );
+
+}
+
+function generateGenericProfile(
+  name
+){
+
+  const point=
+    baselinePoints.find(
+      p=>
+        p[0].toLowerCase()
+        ===
+        name.toLowerCase()
+    );
+
+  const baseline=
+    point
+      ? point[3]
+      : 50;
+
+  return {
+
+    lat:
+      point
+        ? point[1]
+        : 0,
+
+    lon:
+      point
+        ? point[2]
+        : 0,
+
+    hazard:
+      baseline,
+
+    vulnerability:
+      Math.max(
+        20,
+        baseline-5
+      ),
+
+    capacityStress:
+      Math.max(
+        15,
+        baseline-15
+      ),
+
+    flood:
+      baseline,
+
+    landslide:
+      baseline,
+
+    earthquake:
+      baseline,
+
+    shelter:
+      100-baseline,
+
+    transport:
+      100-baseline,
+
+    health:
+      100-baseline,
+
+    reason:
+      "Baseline global screening profile. Replace with validated national and sub-national datasets for operational use."
+
+  };
+
+}
+
+function renderCountry(
+  name,
+  p
+){
+
+  const score=
+    Math.round(
+      (
+        p.hazard*.45
+        +
+        p.vulnerability*.30
+        +
+        p.capacityStress*.25
+      )
+    );
+
+  document
+    .getElementById(
+      "countryName"
+    )
+    .textContent=
+      name.replaceAll(
+        "_",
+        " "
+      );
+
+  document
+    .getElementById(
+      "score"
+    )
+    .textContent=
+      score;
+
+  document
+    .getElementById(
+      "scoreCircle"
+    )
+    .style
+    .setProperty(
+      "--score",
+      score+"%"
+    );
+
+  document
+    .getElementById(
+      "scoreHazard"
+    )
+    .textContent=
+      p.hazard;
+
+  document
+    .getElementById(
+      "scoreVulnerability"
+    )
+    .textContent=
+      p.vulnerability;
+
+  document
+    .getElementById(
+      "scoreCapacity"
+    )
+    .textContent=
+      p.capacityStress;
+
+  document
+    .getElementById(
+      "hazardComponent"
+    )
+    .textContent=
+      p.hazard;
+
+  document
+    .getElementById(
+      "vulnerabilityComponent"
+    )
+    .textContent=
+      p.vulnerability;
+
+  document
+    .getElementById(
+      "capacityComponent"
+    )
+    .textContent=
+      p.capacityStress;
+
+  document
+    .getElementById(
+      "hazardBar"
+    )
+    .style
+    .width=
+      p.hazard+"%";
+
+  document
+    .getElementById(
+      "vulnerabilityBar"
+    )
+    .style
+    .width=
+      p.vulnerability+"%";
+
+  document
+    .getElementById(
+      "capacityBar"
+    )
+    .style
+    .width=
+      p.capacityStress+"%";
+
+
+  let level;
+
+  if(score>=80)
+    level="CRITICAL";
+
+  else if(score>=65)
+    level="HIGH";
+
+  else if(score>=45)
+    level="ELEVATED";
+
+  else
+    level="LOW";
+
+
+  document
+    .getElementById(
+      "countryStatus"
+    )
+    .textContent=
+      level+
+      " BASELINE RISK";
+
+  document
+    .getElementById(
+      "relocationLevel"
+    )
+    .textContent=
+      level;
+
+
+  document
+    .getElementById(
+      "relocationText"
+    )
+    .textContent=
+      score>=80
+
+        ? "Immediate relocation-readiness assessment recommended. Prioritise vulnerable settlements, flood plains, steep terrain, river corridors, evacuation routes and shelter capacity."
+
+        : score>=65
+
+          ? "High preparedness priority. Review exposed settlements, transport routes, shelter capacity and critical services."
+
+          : score>=45
+
+            ? "Enhanced monitoring recommended. Review local vulnerability and capacity constraints."
+
+            : "No elevated baseline relocation signal from this screening model.";
+
+
+  document
+    .getElementById(
+      "scoreLive"
+    )
+    .textContent=
+      liveSignalForCountry(
+        name
+      );
+
+}
+
+function liveSignalForCountry(
+  name
+){
+
+  const lower=
+    name
+      .toLowerCase();
+
+  const relevant=
+    hazards.filter(
+      h=>
+        h.title
+          .toLowerCase()
+          .includes(
+            lower
+          )
+    );
+
+  if(
+    relevant.some(
+      h=>h.risk>=80
+    )
+  )
+    return "HIGH";
+
+  if(
+    relevant.length
+  )
+    return "ACTIVE";
+
+  return "BASELINE";
+
+}
+
+function selectHazard(
+  hazard
+){
+
+  const country=
+    closestCountry(
+      hazard.lat,
+      hazard.lon
+    );
+
+  if(country){
+
+    selectCountry(
+      country
+    );
+
+  }
+
+}
+
+function closestCountry(
+  lat,
+  lon
+){
+
+  let best=null;
+  let distance=Infinity;
+
+  baselinePoints.forEach(
+    p=>{
+
+      const d=
+        Math.pow(
+          lat-p[1],
+          2
+        )
+        +
+        Math.pow(
+          lon-p[2],
+          2
+        );
+
+      if(d<distance){
+
+        distance=d;
+
+        best=p[0];
+
+      }
+
+    }
+  );
+
+  return best;
+
+}
+
+function renderEvents(){
+
+  const container=
+    document.getElementById(
+      "events"
+    );
+
+  const top=
+    [...hazards]
+      .sort(
+        (a,b)=>
+          b.risk-a.risk
+      )
+      .slice(0,10);
+
+  if(!top.length){
+
+    container.innerHTML=
+      `<div style="
+        color:var(--muted);
+        font-size:9px;
+      ">
+        No live events received.
+      </div>`;
+
+    return;
+
+  }
+
+  container.innerHTML=
+    top
+      .map(
+        (e,index)=>{
+
+          const cls=
+            e.risk>=80
+              ? "red"
+              : e.risk>=60
+                ? "orange"
+                : "green";
+
+          return `
+
+            <div
+              class="event"
+              onclick="
+                focusHazard('${escapeAttr(e.id)}')
+              "
+            >
+
+              <div class="event-top">
+
+                <div class="event-title">
+
+                  ${index+1}.
+                  ${escapeHtml(
+                    e.title
+                  )}
+
+                </div>
+
+                <div
+                  class="badge ${cls}"
+                >
+                  ${e.risk}
+                </div>
+
+              </div>
+
+              <div class="event-meta">
+
+                ${escapeHtml(
+                  e.type
+                )}
+                ·
+                ${escapeHtml(
+                  e.source
+                )}
+
+              </div>
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+function focusHazard(
+  id
+){
+
+  const h=
+    hazards.find(
+      x=>x.id===id
+    );
+
+  if(!h)
+    return;
+
+  map.flyTo(
+    [
+      h.lat,
+      h.lon
+    ],
+    6,
+    {
+      duration:.7
+    }
+  );
+
+  selectHazard(
+    h
+  );
+
+}
+
+function updateMetrics(){
+
+  const floods=
+    hazards.filter(
+      h=>
+        h.type
+          .toLowerCase()
+          .includes(
+            "flood"
+          )
+    ).length;
+
+  const high=
+    hazards.filter(
+      h=>h.risk>=80
+    ).length;
+
+  document
+    .getElementById(
+      "liveEvents"
+    )
+    .textContent=
+      hazards.length;
+
+  document
+    .getElementById(
+      "floodEvents"
+    )
+    .textContent=
+      floods;
+
+  document
+    .getElementById(
+      "highEvents"
+    )
+    .textContent=
+      high;
+
+}
+
+function setMode(
+  mode
+){
+
+  currentMode=
+    mode;
+
+  [
+    "modeCombined",
+    "modeLive",
+    "modeBaseline"
+  ].forEach(
+    id=>
+      document
+        .getElementById(id)
+        .classList
+        .remove("active")
+  );
+
+  document
+    .getElementById(
+      mode==="combined"
+        ? "modeCombined"
+        : mode==="live"
+          ? "modeLive"
+          : "modeBaseline"
+    )
+    .classList
+    .add("active");
+
+
+  if(mode==="live"){
+
+    map.addLayer(
+      liveLayer
+    );
+
+    map.removeLayer(
+      baselineLayer
+    );
+
+  }
+
+  else if(mode==="baseline"){
+
+    map.removeLayer(
+      liveLayer
+    );
+
+    map.addLayer(
+      baselineLayer
+    );
+
+  }
+
+  else{
+
+    map.addLayer(
+      liveLayer
+    );
+
+    map.addLayer(
+      baselineLayer
+    );
+
+  }
+
+}
+
+async function refreshAll(){
+
+  hazards=[];
+
+  liveLayer.clearLayers();
+
+  gdacsLayer.clearLayers();
+
+  setSource(
+    "usgsState",
+    "LOADING"
+  );
+
+  setSource(
+    "nasaState",
+    "LOADING"
+  );
+
+  setSource(
+    "gdacsState",
+    "LOADING"
+  );
+
+
+  await Promise.allSettled(
+    [
+      loadUSGS(),
+      loadNASA(),
+      loadGDACS()
+    ]
+  );
+
+
+  renderBaseline();
+
+  updateMetrics();
+
+  renderEvents();
+
+  setMode(
+    currentMode
+  );
+
+  selectCountry(
+    selectedCountry
+  );
+
+}
+
+document
+  .getElementById(
+    "countrySearch"
+  )
+  .addEventListener(
+    "keydown",
+    event=>{
+
+      if(
+        event.key!=="Enter"
+      )
+        return;
+
+      const query=
+        event.target.value
+          .trim()
+          .toLowerCase();
+
+      const match=
+        Object.keys(
+          COUNTRY_PROFILES
+        )
+        .find(
+          key=>
+            key
+              .replaceAll(
+                "_",
+                " "
+              )
+              .toLowerCase()
+              .includes(
+                query
+              )
+        );
+
+      if(match){
+
+        selectCountry(
+          match
+        );
+
+      }
+      else{
+
+        const generic=
+          baselinePoints.find(
+            p=>
+              p[0]
+                .toLowerCase()
+                .includes(
+                  query
+                )
+          );
+
+        if(generic){
+
+          selectCountry(
+            generic[0]
+          );
+
+        }
+
+      }
+
+    }
+  );
+
+
+function worldView(){
+
+  map.fitBounds(
+    WORLD_BOUNDS,
+    {
+      padding:
+        [20,20],
+
+      animate:true
+    }
+  );
+
+}
+
+function setSource(
+  id,
+  state
+){
+
+  const element=
+    document
+      .getElementById(id);
+
+  if(!element)
+    return;
+
+  element.textContent=
+    state;
+
+  element.style.color=
+    state==="LIVE"
+      ? "var(--green)"
+      : state==="ERROR"
+        ? "var(--red)"
+        : "var(--orange)";
+
+}
+
+function clock(){
+
+  document
+    .getElementById(
+      "clock"
+    )
+    .textContent=
+      new Date()
+        .toISOString()
+        .slice(11,19)
+      +
+      " UTC";
+
+}
+
+setInterval(
+  clock,
+  1000
+);
+
+clock();
+
+function normalizeCountryKey(
+  name
+){
+
+  const aliases={
+
+    "United States":
+      "United_States",
+
+    "United States of America":
+      "United_States",
+
+    "USA":
+      "United_States",
+
+    "Nepal":
+      "Nepal",
+
+    "Bangladesh":
+      "Bangladesh",
+
+    "India":
+      "India"
+
+  };
+
+  return (
+    aliases[name]
+    ||
+    name
+      .replaceAll(
+        " ",
+        "_"
+      )
+  );
+
+}
+
+function escapeHtml(
+  value
+){
+
+  return String(
+    value ?? ""
+  )
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+
+}
+
+
+function escapeAttr(
+  value
+){
+
+  return String(
+    value ?? ""
+  )
+    .replaceAll(
+      "'",
+      "\\'"
+    );
+
+}
+
+renderBaseline();
+
+selectCountry(
+  "Nepal"
+);
+
+refreshAll();
+
+setInterval(
+  refreshAll,
+  CONFIG.refreshMs
+);
+
+</script>
+
+</body>
+</html>
